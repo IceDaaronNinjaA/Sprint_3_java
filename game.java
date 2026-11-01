@@ -12,6 +12,11 @@ public class game {
     private static final Random random = new Random();
 
     public static void main(String[] args) {
+        GameGUI.launch();
+    }
+
+    // The original console version is kept here while the GUI version is used by default.
+    static void consoleMain(String[] args) {
         System.out.println("=================================");
         System.out.println("       THE BEGINNING OF A QUEST  ");
         System.out.println("=================================");
@@ -24,6 +29,8 @@ public class game {
 
         Player player = new Player(name);
         Store store = new Store();
+        boolean campAvailable = true;
+        boolean storeAvailable = true;
         System.out.println("\nWelcome, " + player.name + "! Your adventure begins.");
 
         boolean playing = true;
@@ -31,8 +38,10 @@ public class game {
             System.out.println("\nWhat would you like to do?");
             System.out.println("1. Explore");
             System.out.println("2. View character");
-            System.out.println("3. Rest at camp (+10 HP)");
-            System.out.println("4. Visit store");
+            System.out.println("3. Rest at camp (+10 HP)"
+                    + (campAvailable ? "" : " [UNAVAILABLE]"));
+            System.out.println("4. Visit store"
+                    + (storeAvailable ? "" : " [UNAVAILABLE]"));
             System.out.println("5. Quit");
             System.out.print("> ");
 
@@ -40,15 +49,29 @@ public class game {
             switch (choice) {
                 case "1":
                     explore(player);
+                    campAvailable = isAvailableNextTurn();
+                    storeAvailable = isAvailableNextTurn();
                     break;
                 case "2":
                     player.showStatus();
                     break;
                 case "3":
-                    player.rest();
+                    if (campAvailable) {
+                        player.rest();
+                        campAvailable = isAvailableNextTurn();
+                        storeAvailable = isAvailableNextTurn();
+                    } else {
+                        System.out.println("The camp is too far away right now. Explore first and try again later.");
+                    }
                     break;
                 case "4":
-                    store.enter(player, scanner);
+                    if (storeAvailable) {
+                        store.enter(player, scanner);
+                        campAvailable = isAvailableNextTurn();
+                        storeAvailable = isAvailableNextTurn();
+                    } else {
+                        System.out.println("The merchant is not here right now. Explore first and try again later.");
+                    }
                     break;
                 case "5":
                     playing = false;
@@ -63,6 +86,11 @@ public class game {
             System.out.println("\nYou have fallen in battle. Game over!");
         }
         scanner.close();
+    }
+
+    private static boolean isAvailableNextTurn() {
+        // Each location has a 65% chance of being available after an action.
+        return random.nextInt(100) < 65;
     }
 
     private static void explore(Player player) {
