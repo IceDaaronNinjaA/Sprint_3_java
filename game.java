@@ -1,7 +1,10 @@
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
 
 /**
+ * 
  * A small text-based RPG that runs in the console.
  */
 public class game {
@@ -20,6 +23,7 @@ public class game {
         }
 
         Player player = new Player(name);
+        Store store = new Store();
         System.out.println("\nWelcome, " + player.name + "! Your adventure begins.");
 
         boolean playing = true;
@@ -28,7 +32,8 @@ public class game {
             System.out.println("1. Explore");
             System.out.println("2. View character");
             System.out.println("3. Rest at camp (+10 HP)");
-            System.out.println("4. Quit");
+            System.out.println("4. Visit store");
+            System.out.println("5. Quit");
             System.out.print("> ");
 
             String choice = scanner.nextLine().trim();
@@ -43,11 +48,14 @@ public class game {
                     player.rest();
                     break;
                 case "4":
+                    store.enter(player, scanner);
+                    break;
+                case "5":
                     playing = false;
                     System.out.println("You leave the adventure for another day.");
                     break;
                 default:
-                    System.out.println("Please enter 1, 2, 3, or 4.");
+                    System.out.println("Please enter 1, 2, 3, 4, or 5.");
             }
         }
 
@@ -87,7 +95,7 @@ public class game {
             System.out.println("\n" + player.name + " HP: " + player.hp + "/" + player.maxHp
                     + " | " + enemy.name + " HP: " + enemy.hp);
             System.out.println("1. Attack");
-            System.out.println("2. Use potion (" + player.potions + " left)");
+            System.out.println("2. Use potion (" + player.getItemCount("Potion") + " left)");
             System.out.println("3. Run");
             System.out.print("> ");
             String choice = scanner.nextLine().trim();
@@ -125,23 +133,27 @@ public class game {
             int gold = 3 + random.nextInt(8);
             player.experience += experience;
             player.gold += gold;
+            player.addItem("Potion", 1);
             System.out.println("You defeated the " + enemy.name + "! You gained "
-                    + experience + " XP and " + gold + " gold.");
+                    + experience + " XP, " + gold + " gold, and found a Potion.");
             player.checkLevelUp();
         }
     }
 
-    private static class Player {
+    static class Player {
         private final String name;
         private int level = 1;
         private int experience = 0;
         private int maxHp = 40;
         private int hp = maxHp;
         private int gold = 0;
-        private int potions = 2;
+        // HashMap is a Java Collection Framework data structure.
+        // It stores each item name and the number of that item in the inventory.
+        private final HashMap<String, Integer> inventory = new HashMap<>();
 
         private Player(String name) {
             this.name = name;
+            addItem("Potion", 2);
         }
 
         private boolean isAlive() {
@@ -153,12 +165,37 @@ public class game {
         }
 
         private boolean usePotion() {
-            if (potions == 0) {
+            if (getItemCount("Potion") == 0) {
                 return false;
             }
-            potions--;
+            removeItem("Potion", 1);
             heal(15);
             return true;
+        }
+
+        void addItem(String item, int amount) {
+            inventory.put(item, getItemCount(item) + amount);
+        }
+
+        int getGold() {
+            return gold;
+        }
+
+        void spendGold(int amount) {
+            gold -= amount;
+        }
+
+        private void removeItem(String item, int amount) {
+            int remaining = getItemCount(item) - amount;
+            if (remaining <= 0) {
+                inventory.remove(item);
+            } else {
+                inventory.put(item, remaining);
+            }
+        }
+
+        private int getItemCount(String item) {
+            return inventory.getOrDefault(item, 0);
         }
 
         private void heal(int amount) {
@@ -186,7 +223,10 @@ public class game {
             System.out.println("Level: " + level + " (" + experience + " XP)");
             System.out.println("HP: " + hp + "/" + maxHp);
             System.out.println("Gold: " + gold);
-            System.out.println("Potions: " + potions);
+            System.out.println("Inventory:");
+            for (Map.Entry<String, Integer> item : inventory.entrySet()) {
+                System.out.println("- " + item.getKey() + ": " + item.getValue());
+            }
         }
     }
 
