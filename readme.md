@@ -7,9 +7,9 @@ fight random enemies, earn gold and experience, level up, rest, and use potions.
 
 Steps to build and/or run the software:
 
-1. get file off of github 
-2. complile the code using commands in the terminal or in VS code.
-3. run the program
+1. get zip off of github
+2. have java
+3. unzip and run the .bat
 
 Instructions for using the software:
 
@@ -35,5 +35,5 @@ I found these websites useful in developing this software:
 The following items I plan to fix, improve, and/or add to this project in the future:
 
 * [ ] Add more areas and quests
-* [ ] Add an equipment and shop system
+* [ ] Add an equipment
 * [ ] Save and load player progress
